@@ -2,9 +2,9 @@
 Developed by Aindriya Barua in November, 2021
 """
 
-import numpy as np
-
+import os
 import json
+import numpy as np
 import fasttext as ft
 
 import sentence_normalizer
@@ -14,16 +14,14 @@ def parse_data(ft_model):
     with open("dataset.json") as file:
         data = json.load(file)
 
-    embedded_patterns = []
     for intent in data['intents']:
-
+        embedded_patterns = []
         for pattern in intent['patterns']:
             pattern = sentence_normalizer.preprocess_main(pattern)
             embedded_sentence = embed_sentence(pattern, ft_model)
 
             embedded_patterns.append(embedded_sentence)
         intent['patterns'] = np.array(embedded_patterns).tolist()
-
 
     return data
 
@@ -40,8 +38,14 @@ def write_embedded_data(data):
         outfile.write(json_object)
 
 
-def load_embedding_model():
-    ft_model = ft.load_model('cc.en.300.bin')
+def load_embedding_model(model_path='cc.en.300.bin'):
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(
+            f"FastText model '{model_path}' not found. "
+            "Please download 'cc.en.300.bin.gz' from https://fasttext.cc/docs/en/crawl-vectors.html "
+            "and extract it to the project root directory."
+        )
+    ft_model = ft.load_model(model_path)
     return ft_model
 
 

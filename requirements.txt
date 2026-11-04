@@ -1,13 +1,8 @@
 numpy
 nltk
-tensorflow
-tflearn
 flask
-gensim
-sklearn
 pymongo
+scikit-learn
 fasttext
-tsne
-
-
-
+gunicorn
+matplotlib

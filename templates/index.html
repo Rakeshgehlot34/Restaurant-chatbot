@@ -1,142 +1,184 @@
 <!DOCTYPE html>
-<html>
-  <title>Restaurant Chatbot</title>
+<html lang="en">
   <head>
-    <link rel="icon" href="">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Chatbot</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font-family: monospace;
+        font-family: 'Helvetica', Arial, sans-serif;
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
         background-attachment: fixed;
+        margin: 0;
+        padding: 20px 10px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .header-container {
+        text-align: center;
+        margin-bottom: 15px;
       }
       h2 {
         background-color: white;
         border: 2px solid black;
         border-radius: 5px;
         color: #03989E;
-        display: inline-block;Helvetica
+        display: inline-block;
         margin: 5px;
-        padding: 5px;
+        padding: 8px 16px;
       }
-      h4{
-      position: center;
+      h4 {
+        margin: 8px 0;
+        color: #333;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+      }
+      .chat-container {
+        width: 100%;
+        max-width: 550px;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
       #chatbox {
-        margin-top: 10px;
-        margin-bottom: 60px;
-        margin-left: auto;
-        margin-right: auto;
-        width: 40%;
-        height: 40%
-        position:fixed;
-
+        height: 60vh;
+        overflow-y: auto;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
-      #userInput {
-        margin-left: auto;
-        margin-right: auto;
-        width: 40%;
-        margin-top: 60px;
-      }
-      #textInput {
-        width: 90%;
-        border: none;
-        border-bottom: 3px solid black;
-        font-family: 'Helvetica';
-        font-size: 17px;
-      }
-      .userText {
-        width:fit-content; width:-webkit-fit-content; width:-moz-fit-content;
-        color: white;
-        background-color: #FF9351;
-        font-family: 'Helvetica';
-        font-size: 12px;
-        margin-left: auto;
-        margin-right: 0;
+      .userText, .botText {
+        max-width: 80%;
+        width: fit-content;
         line-height: 20px;
         border-radius: 5px;
-        text-align: left;
+        font-size: 13px;
+        margin: 2px 0;
+        word-wrap: break-word;
       }
-      .userText span {
-        padding:10px;
+      .userText {
+        align-self: flex-end;
+        color: white;
+        background-color: #FF9351;
+      }
+      .userText span, .botText span {
+        display: inline-block;
+        padding: 8px 12px;
         border-radius: 5px;
       }
       .botText {
-        margin-left: 0;
-        margin-right: auto;
-        width:fit-content; width:-webkit-fit-content; width:-moz-fit-content;
+        align-self: flex-start;
         color: white;
         background-color: #00C2CB;
-        font-family: 'Helvetica';
-        font-size: 12px;
-        line-height: 20px;
-        text-align: left;
-        border-radius: 5px;
       }
-      .botText span {
+      .botText.error {
+        background-color: #d9534f;
+      }
+      #userInput {
+        display: flex;
+        border-top: 1px solid #ddd;
+        background-color: #fff;
         padding: 10px;
-        border-radius: 5px;
       }
-      .boxed {
-        margin-left: auto;
-        margin-right: auto;
-        width: 100%;
-        border-radius: 5px;
+      #nameInput {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px 14px;
+        font-size: 15px;
+        font-family: inherit;
+        outline: none;
       }
-      input[type=text] {
-        bottom: 0;
-        width: 40%;
-        padding: 12px 20px;
-        margin: 8px 0;
-        box-sizing: border-box;
-        position: fixed;
-        border-radius: 5px;
+      #nameInput:focus {
+        border-color: #03989E;
+      }
+      #sendButton {
+        background-color: #03989E;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 18px;
+        margin-left: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      #sendButton:hover {
+        background-color: #027a7f;
       }
     </style>
   </head>
-  <body background="{{ url_for('static', filename='images/slider.jpg') }}">
-    <img />
-    <center>
-      <h2>
-      Welcome to Aindri's Restro
-      </h2>
-      <h4>
-        You are chatting with our customer support bot!
-      </h4>
-    </center>
-    <div class="boxed">
-      <div>
-        <div id="chatbox">
-        </div>
+  <body style="background-image: url('{{ url_for('static', filename='images/slider.jpg') }}');">
+    <div class="header-container">
+      <h2>Welcome to Aindri's Restro</h2>
+      <h4>You are chatting with our customer support bot!</h4>
+    </div>
+
+    <div class="chat-container">
+      <div id="chatbox">
+        <p class="botText"><span><b>Restrobot : </b>Hello! How can I assist you with our restaurant today?</span></p>
       </div>
-        <div id="userInput">
-          <input id="nameInput" type="text" name="msg" placeholder="Ask me anything..." />
-        </div>
-<script>
-        function getBotResponse() {
-          var rawText = $("#nameInput").val();
-          var userHtml = '<p class="userText"><span><b>' + "You : " + '</b>' + rawText + "</span></p>";
-          $("#nameInput").val("");
-          $("#chatbox").append(userHtml);
-          document
-            .getElementById("userInput")
-            .scrollIntoView({ block: "start", behavior: "smooth" });
-          $.get("/get", { msg: rawText }).done(function(data) {
-            var botHtml = '<p class="botText"><span><b>' + "Restrobot : " + '</b>' + data + "</span></p>";
-            $("#chatbox").append(botHtml);
-            document
-              .getElementById("userInput")
-              .scrollIntoView({ block: "start", behavior: "smooth" });
-          });
+      <div id="userInput">
+        <input id="nameInput" type="text" name="msg" placeholder="Ask me anything..." autocomplete="off" />
+        <button id="sendButton" type="button" onclick="getBotResponse()">Send</button>
+      </div>
+    </div>
+
+    <script>
+      function escapeHtml(text) {
+        return $("<div>").text(text).html();
+      }
+
+      function scrollToBottom() {
+        var chatbox = $("#chatbox");
+        chatbox.scrollTop(chatbox[0].scrollHeight);
+      }
+
+      function getBotResponse() {
+        var inputField = $("#nameInput");
+        var rawText = inputField.val().trim();
+        if (!rawText) {
+          return;
         }
-        $("#nameInput").keypress(function(e) {
-          if (e.which == 13) {
-            getBotResponse();
-          }
-        });
-</script>
-</div>
-</body>
+
+        var safeUserText = escapeHtml(rawText);
+        var userHtml = '<p class="userText"><span><b>You : </b>' + safeUserText + '</span></p>';
+        inputField.val("");
+        $("#chatbox").append(userHtml);
+        scrollToBottom();
+
+        $.get("/get", { msg: rawText })
+          .done(function(data) {
+            var safeBotText = escapeHtml(data);
+            var botHtml = '<p class="botText"><span><b>Restrobot : </b>' + safeBotText + '</span></p>';
+            $("#chatbox").append(botHtml);
+            scrollToBottom();
+          })
+          .fail(function() {
+            var errorHtml = '<p class="botText error"><span><b>Restrobot : </b>Sorry, there was an issue connecting to the server. Please try again.</span></p>';
+            $("#chatbox").append(errorHtml);
+            scrollToBottom();
+          });
+      }
+
+      $("#nameInput").on("keypress", function(e) {
+        if (e.which === 13) {
+          getBotResponse();
+        }
+      });
+    </script>
+  </body>
 </html>

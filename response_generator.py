@@ -2,6 +2,7 @@
 Developed by Aindriya Barua in November, 2021
 """
 
+import os
 import json
 import random
 import datetime
@@ -11,7 +12,8 @@ import uuid
 import intent_classifier
 
 seat_count = 50
-client = pymongo.MongoClient("mongodb://localhost:27017/")
+mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+client = pymongo.MongoClient(mongo_uri)
 db = client["restaurant"]
 menu_collection = db["menu"]
 feedback_collection = db["feedback"]
@@ -42,10 +44,10 @@ def book_table():
 
 def vegan_menu():
     query = {"vegan": "Y"}
-    vegan_doc = menu_collection.find(query)
-    if vegan_doc.count() > 0:
+    vegan_docs = list(menu_collection.find(query))
+    if len(vegan_docs) > 0:
         response = "Vegan options are: "
-        for x in vegan_doc:
+        for x in vegan_docs:
             response = response + str(x.get("item")) + " for Rs. " + str(x.get("cost")) + "; "
         response = response[:-2] # to remove the last ;
     else:
@@ -55,10 +57,10 @@ def vegan_menu():
 
 def veg_menu():
     query = {"veg": "Y"}
-    vegan_doc = menu_collection.find(query)
-    if vegan_doc.count() > 0:
+    veg_docs = list(menu_collection.find(query))
+    if len(veg_docs) > 0:
         response = "Vegetarian options are: "
-        for x in vegan_doc:
+        for x in veg_docs:
             response = response + str(x.get("item")) + " for Rs. " + str(x.get("cost")) + "; "
         response = response[:-2] # to remove the last ;
     else:
@@ -67,12 +69,12 @@ def veg_menu():
 
 
 def offers():
-    all_offers = menu_collection.distinct('offer')
-    if len(all_offers)>0:
+    all_offers = [ofr for ofr in menu_collection.distinct('offer') if ofr]
+    if len(all_offers) > 0:
         response = "The SPECIAL OFFERS are: "
         for ofr in all_offers:
             docs = menu_collection.find({"offer": ofr})
-            response = response + ' ' + ofr.upper() + " On: "
+            response = response + ' ' + str(ofr).upper() + " On: "
             for x in docs:
                 response = response + str(x.get("item")) + " - Rs. " + str(x.get("cost")) + "; "
             response = response[:-2] # to remove the last ;
@@ -110,11 +112,12 @@ def recipe_enquiry(message):
     all_foods = menu_collection.distinct('item')
     response = ""
     for food in all_foods:
-        query = {"item": food}
-        food_doc = menu_collection.find(query)[0]
         if food.lower() in message.lower():
-            response = food_doc.get("about")
-            break
+            query = {"item": food}
+            food_doc = menu_collection.find_one(query)
+            if food_doc:
+                response = food_doc.get("about")
+                break
     if "" == response:
         response = "Sorry please try again with exact spelling of the food item!"
     return response

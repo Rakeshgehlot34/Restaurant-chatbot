@@ -10,15 +10,16 @@ inconsequential words to make this list
 stop_words = ['the', 'you', 'i', 'are', 'is', 'a', 'me', 'to', 'can', 'this', 'your', 'have', 'any', 'of', 'we', 'very',
               'could', 'please', 'it', 'with', 'here', 'if', 'my', 'am']
 
+lemmatizer = WordNetLemmatizer()
+tokenizer = RegexpTokenizer(r'\w+')
+
 
 def lemmatize_sentence(tokens):
-    lemmatizer = WordNetLemmatizer()
     lemmatized_tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return lemmatized_tokens
 
 
 def tokenize_and_remove_punctuation(sentence):
-    tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(sentence)
     return tokens
 
